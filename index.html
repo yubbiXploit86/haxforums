@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>DarkSec Forum — Threads</title>
+<link rel="icon" href="data:;base64,iVBORw0KGgo=">
+<style>
+:root{
+  --bg:#0b0c0f; --panel:#0e1114; --muted:#97a0ab; --accent:#28ffd6; --accent-2:#2dd4ff;
+  --gold:#ffd166; --danger:#ff6b6b; --radius:10px; --mono:ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial;color:#e6f7f5;
+  background:linear-gradient(180deg,#030409 0%, #071018 100%);
+  -webkit-font-smoothing:antialiased;
+}
+.header{
+  height:44px;background:#061018;border-bottom:1px solid rgba(255,255,255,0.03);
+  display:flex;align-items:center;padding:0 18px;justify-content:space-between;
+}
+.brand{display:flex;gap:12px;align-items:center}
+.logo{width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,#00ffd1,#00b3ff);display:flex;align-items:center;justify-content:center;color:#001;font-weight:900}
+.brand h1{margin:0;font-size:16px;color:var(--accent)}
+.header-right{display:flex;gap:8px;align-items:center}
+
+/* layout */
+.wrapper{max-width:1200px;margin:18px auto;display:grid;grid-template-columns:300px 1fr;gap:18px;padding:0 12px}
+@media(max-width:900px){.wrapper{grid-template-columns:1fr} .left{order:2} .center{order:1}}
+
+/* left sidebar */
+.left{height:calc(100vh - 80px);overflow:auto}
+.profile-card{background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);border-radius:12px;padding:14px;border:1px solid rgba(255,255,255,0.02);margin-bottom:12px;text-align:center}
+#pp{width:120px;height:120px;border-radius:8px;background:#081018;object-fit:cover;border:2px solid rgba(255,255,255,0.03)}
+.profile-name{font-weight:900;margin-top:10px}
+.role-badge{display:inline-block;margin-top:8px;padding:6px 10px;border-radius:999px;background:rgba(46,255,199,0.06);color:var(--accent);font-weight:800}
+.meta-list{margin-top:12px;text-align:left}
+.meta-list div{display:flex;justify-content:space-between;padding:6px 0;border-top:1px dashed rgba(255,255,255,0.02);color:var(--muted)}
+
+/* center thread */
+.center{min-height:80vh}
+.thread-box{background:#0d1114;border-radius:10px;border:1px solid rgba(255,255,255,0.02);padding:14px;margin-bottom:12px}
+.thread-header{display:flex;gap:12px;align-items:center}
+.thread-banner{flex:1;padding:10px;border-radius:8px;background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent)}
+.thread-title{font-weight:900;font-size:20px;color:#dffbf1}
+.thread-meta{color:var(--muted);font-size:13px;margin-top:6px}
+
+/* post */
+.post{display:flex;gap:12px;padding:14px;border-radius:8px;background:linear-gradient(180deg, rgba(255,255,255,0.005), transparent);border:1px solid rgba(255,255,255,0.02);margin-top:12px}
+.post .avatar{width:120px;flex-shrink:0;text-align:center}
+.post .avatar img{width:96px;height:96px;border-radius:6px;object-fit:cover;background:#061018}
+.post .meta{font-size:13px;color:var(--muted);margin-top:8px}
+.post .content{flex:1}
+.post .actions{margin-top:8px;display:flex;gap:8px;align-items:center}
+.btn{background:linear-gradient(90deg, rgba(46,255,199,0.12), rgba(127,190,255,0.06));border:1px solid rgba(255,255,255,0.03);padding:8px 10px;border-radius:8px; cursor:pointer; color:var(--accent); font-weight:800}
+.btn.ghost{background:transparent;color:var(--muted)}
+.award-btn{background:var(--gold);color:#111;border:0;padding:7px 10px;border-radius:8px;cursor:pointer}
+
+/* code/table look */
+.code-box{background:#0a0c0e;border-radius:8px;padding:10px;margin-top:12px;border:1px solid rgba(255,255,255,0.02);color:#cfeef0;overflow:auto;font-family:var(--mono);font-size:13px}
+
+/* shop */
+.shop-list{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.shop-item{background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.02)}
+.shop-item h4{margin:0 0 6px 0}
+.price{font-weight:800;color:var(--accent)}
+
+/* footer */
+.footer{margin-top:12px;text-align:center;color:var(--muted);font-size:13px}
+
+/* small helpers */
+.small{color:var(--muted);font-size:13px}
+.stars{color:var(--gold);font-weight:900;margin-left:6px}
+.centered{display:flex;align-items:center;justify-content:center}
+.search{width:100%;padding:8px;border-radius:8px;border:1px dashed rgba(255,255,255,0.03);background:transparent;color:inherit}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="brand"><div class="logo">DS</div><h1>DarkSec Forum</h1></div>
+  <div class="header-right" id="headerRight"></div>
+</div>
+
+<div class="wrapper">
+  <!-- LEFT: profile & shop -->
+  <aside class="left">
+    <div class="profile-card card">
+      <img id="pp" src="" alt="PP">
+      <div class="profile-name" id="profileName">Guest</div>
+      <div class="role-badge" id="profileRole">Member</div>
+      <div class="small" id="profileReputation">Reputation: 0</div>
+      <div class="meta-list">
+        <div><span class="small">Posts</span><strong id="metaPosts">0</strong></div>
+        <div><span class="small">Threads</span><strong id="metaThreads">0</strong></div>
+        <div><span class="small">Joined</span><strong id="metaJoined">—</strong></div>
+      </div>
+      <div style="margin-top:10px">
+        <label class="btn">Change PP <input type="file" id="ppFile" style="display:none" accept="image/*"></label>
+        <button class="btn ghost" id="btn-edit" style="display:none">Edit</button>
+        <button class="btn ghost" id="btn-logout" style="display:none">Logout</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="small">Shop (Buy with reputation)</div>
+      <div class="shop-list" id="shopList" style="margin-top:10px"></div>
+    </div>
+
+    <div class="card small">
+      © 2025 DarkSec Forum by <strong>jufitareta</strong>
+    </div>
+  </aside>
+
+  <!-- CENTER: thread area -->
+  <section class="center">
+    <div class="thread-box card">
+      <div class="thread-header">
+        <div style="width:120px;text-align:center">
+          <!-- left placeholder for thread avatar -->
+        </div>
+        <div class="thread-banner">
+          <div class="thread-title" id="threadTitle">6.7 million population data of Banten province by NYETLUPLUP</div>
+          <div class="thread-meta small">by <strong id="threadAuthor">NYETLUPLUP</strong> • <span id="threadTime">27-09-25, 10:49 AM</span></div>
+        </div>
+      </div>
+
+      <!-- code/table style content -->
+      <div class="code-box" id="threadContent">
+        <!-- sample columns like: nomor | nik | nama | alamat | bidang_usaha | no_hp -->
+        <div style="display:flex;gap:12px;font-weight:700;color:#cdeff0">
+          <div style="width:80px">nomor</div><div style="width:180px">nik</div><div style="flex:1">nama</div><div style="flex:1">alamat</div><div style="width:160px">bidang_usaha</div><div style="width:120px">no_hp</div>
+        </div>
+        <div id="dataRows"></div>
+      </div>
+    </div>
+
+    <!-- posts list -->
+    <div id="postsArea"></div>
+
+    <!-- new reply (visible when logged in) -->
+    <div class="card" id="replyCard" style="display:none">
+      <h4 style="margin:0 0 8px 0">Reply</h4>
+      <textarea id="replyText" rows="4" style="width:100%;background:transparent;border:1px dashed rgba(255,255,255,0.03);padding:8px;border-radius:8px;color:inherit"></textarea>
+      <div class="row" style="margin-top:8px">
+        <input type="file" id="replyFile">
+        <button class="btn" id="btnSendReply">Send Reply</button>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<div class="footer" style="padding:18px 0">Built for community & education — use responsibly</div>
+
+<!-- Modal -->
+<div id="modal" style="display:none;position:fixed;inset:0;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);z-index:60">
+  <div style="width:92%;max-width:780px;margin:auto" class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div><strong id="modalTitle">Thread</strong><div class="small" id="modalSub"></div></div>
+      <div><button class="btn ghost" id="modalClose">Close</button></div>
+    </div>
+    <hr/>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+/* Single-file client-side forum with reputation & shop
+   Data keys:
+     ds_users  : { username: { password, displayName, photo (dataURL), points, awardsReceived, createdAt } }
+     ds_threads: { id, title, author, createdAt, dataRowsHTML, file(dataURL), posts: [{id, author, body, file, createdAt, awards}] , awards }
+     ds_current: username
+*/
+
+// Helpers
+const $ = id => document.getElementById(id);
+const now = ()=> new Date().toLocaleString();
+const isoNow = ()=> new Date().toISOString();
+const uid = ()=> Math.floor(Math.random()*1e9).toString(36);
+const esc = s => s ? (''+s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])) : '';
+
+// Storage helpers
+function load(k,d){ try{ return JSON.parse(localStorage.getItem(k)) || d }catch(e){return d} }
+function save(k,v){ localStorage.setItem(k, JSON.stringify(v)) }
+
+// Data init
+let users = load('ds_users',{});
+let threads = load('ds_threads',[]);
+let current = localStorage.getItem('ds_current') || null;
+
+// If no threads, seed main thread like screenshot with sample rows
+if(threads.length===0){
+  const sampleRows = [
+    {nomor:'91470', nik:'3601190107750024', nama:'ENTONG SUPRIYADI', alamat:'KAMPUNG NAGROG DESA BAYUMUNDU', bidang:'WIRASWASTA', hp:'081234567890'},
+    {nomor:'91471', nik:'3601190107750025', nama:'SITI AMALIA', alamat:'KELURAHAN A', bidang:'PEGAWAI', hp:'081298765432'}
+  ];
+  const rowsHTML = sampleRows.map(r => `<div style="display:flex;gap:12px;padding:8px 0;border-top:1px dashed rgba(255,255,255,0.02)"><div style="width:80px">${esc(r.nomor)}</div><div style="width:180px">${esc(r.nik)}</div><div style="flex:1">${esc(r.nama)}</div><div style="flex:1">${esc(r.alamat)}</div><div style="width:160px">${esc(r.bidang)}</div><div style="width:120px">${esc(r.hp)}</div></div>`).join('');
+  threads.push({
+    id: uid(), title: '6.7 million population data of Banten province by NYETLUPLUP', author: 'NYETLUPLUP', createdAt: isoNow(),
+    dataRowsHTML: rowsHTML, file:'', posts: [], awards: 0
+  });
+  save('ds_threads', threads);
+}
+
+// Shop items
+const shopItems = [
+  {id:'badge1', title:'Custom Badge', desc:'Small badge for profile', price:50},
+  {id:'vip', title:'VIP Title', desc:'Display VIP in profile', price:200},
+  {id:'gold_frame', title:'Gold Avatar Frame', desc:'Decorative frame', price:120}
+];
+
+// Rank logic
+function rankFor(points){
+  if(points >= 1000) return {name:'God', stars:5};
+  if(points >= 300) return {name:'Pro', stars:4};
+  if(points >= 100) return {name:'MVP', stars:3};
+  return {name:'Member', stars:1};
+}
+
+// Render functions
+function renderHeader(){
+  const hr = $('headerRight') || null;
+  // not used now
+}
+
+function renderProfile(){
+  if(current && users[current]){
+    const u = users[current];
+    $('profileName').textContent = u.displayName || current;
+    $('profileReputation').textContent = 'Reputation: ' + (u.points||0);
+    $('profileRole').textContent = rankFor(u.points||0).name;
+    $('pp').src = u.photo || '';
+    $('metaPosts').textContent = countUserPosts(current);
+    $('metaThreads').textContent = countUserThreads(current);
+    $('metaJoined').textContent = new Date(u.createdAt).toLocaleDateString();
+    $('btn-edit').style.display = 'inline-block';
+    $('btn-logout').style.display = 'inline-block';
+  } else {
+    $('profileName').textContent = 'Guest';
+    $('profileReputation').textContent = 'Reputation: 0';
+    $('profileRole').textContent = 'Member';
+    $('pp').src = '';
+    $('metaPosts').textContent = '0';
+    $('metaThreads').textContent = threads.length;
+    $('metaJoined').textContent = '—';
+    $('btn-edit').style.display = 'none';
+    $('btn-logout').style.display = 'none';
+  }
+  renderShop();
+}
+
+function countUserPosts(username){
+  let c = 0;
+  threads.forEach(t=>{
+    if(t.author === username) c++;
+    (t.posts||[]).forEach(p=> { if(p.author===username) c++ });
+  });
+  return c;
+}
+function countUserThreads(username){
+  return threads.filter(t=>t.author===username).length;
+}
+
+function renderThread(){
+  const t = threads[0]; // main thread
+  $('threadTitle').textContent = t.title;
+  $('threadAuthor').textContent = t.author;
+  $('threadTime').textContent = new Date(t.createdAt).toLocaleString();
+  $('dataRows').innerHTML = t.dataRowsHTML || '';
+  renderPosts();
+}
+
+function renderPosts(){
+  const t = threads[0];
+  const area = $('postsArea');
+  area.innerHTML = '';
+  // original post as highlighted
+  const op = document.createElement('div');
+  op.className = 'post';
+  const author = users[t.author] || {displayName:t.author, photo:''};
+  op.innerHTML = `<div class="avatar"><img src="${author.photo||''}" alt=""></div>
+    <div class="content">
+      <div style="display:flex;justify-content:space-between;align-items:center"><div><strong>${esc(author.displayName||t.author)}</strong><div class="small">${new Date(t.createdAt).toLocaleString()}</div></div><div><span class="badge">${t.awards||0} Award</span></div></div>
+      <div style="margin-top:8px" class="small">${esc(t.title)}</div>
+      <div class="code-box" style="margin-top:8px">${t.dataRowsHTML}</div>
+      <div class="actions"><button class="btn ghost" onclick="openModal('op')">View Full</button> <button class="award-btn" onclick="giveAwardThread('${t.id}')">Give Award</button></div>
+    </div>`;
+  area.appendChild(op);
+
+  // replies
+  (t.posts||[]).forEach(p=>{
+    const a = users[p.author] || {displayName:p.author,photo:''};
+    const n = document.createElement('div'); n.className='post';
+    n.innerHTML = `<div class="avatar"><img src="${a.photo||''}" alt=""></div>
+      <div class="content">
+        <div style="display:flex;justify-content:space-between;align-items:center"><div><strong>${esc(a.displayName||p.author)}</strong><div class="small">${new Date(p.createdAt).toLocaleString()}</div></div><div class="small">Awards: ${p.awards||0}</div></div>
+        <div style="margin-top:8px">${esc(p.body)}</div>
+        ${p.file ? `<div class="file-link small"><a href="${p.file}" target="_blank">Attachment</a></div>` : ''}
+        <div class="actions"><button class="btn ghost" onclick="openModal('${p.id}')">Open</button> <button class="award-btn" onclick="giveAwardPost('${t.id}','${p.id}')">Give Award</button></div>
+      </div>`;
+    area.appendChild(n);
+  });
+}
+
+// Modal open (view content or post)
+function openModal(key){
+  const m = $('modal');
+  const body = $('modalBody');
+  if(key === 'op'){
+    const t = threads[0];
+    body.innerHTML = `<div class="small">Original Post</div><h3>${esc(t.title)}</h3><div class="small">by ${esc(t.author)}</div><div style="margin-top:8px">${t.dataRowsHTML}</div>`;
+  } else {
+    // search for post by id
+    const t = threads[0];
+    const p = (t.posts||[]).find(x=>x.id===key);
+    if(!p) { body.innerHTML = '<div>Not found</div>'; }
+    else {
+      const a = users[p.author] || {displayName:p.author};
+      body.innerHTML = `<div class="small">by ${esc(a.displayName||p.author)} • ${new Date(p.createdAt).toLocaleString()}</div><div style="margin-top:8px">${esc(p.body)}</div>`;
+      if(p.file) body.innerHTML += `<div class="file-link small"><a href="${p.file}" target="_blank">Attachment</a></div>`;
+    }
+  }
+  m.style.display = 'flex';
+}
+$('modalClose').onclick = ()=> $('modal').style.display = 'none';
+window.addEventListener('click', e=> { if(e.target === $('modal')) $('modal').style.display='none' });
+
+// Reply send
+$('btnSendReply').onclick = async ()=>{
+  if(!current) return alert('Login dulu');
+  const text = $('replyText').value.trim();
+  if(!text) return alert('Isi balasan');
+  let fileData = '';
+  const f = $('replyFile').files[0];
+  if(f){
+    if(f.size > 6*1024*1024) return alert('Max 6MB');
+    fileData = await toDataURL(f);
+  }
+  const p = {id: uid(), author: current, body: text, file: fileData, createdAt: isoNow(), awards:0};
+  threads[0].posts.push(p);
+  save('ds_threads', threads);
+  $('replyText').value=''; $('replyFile').value='';
+  renderPosts(); renderProfile(); save('ds_threads', threads);
+};
+
+// Awards (thread & post)
+function giveAwardThread(threadId){
+  if(!current) return alert('Login dulu');
+  const t = threads.find(x=>x.id===threadId);
+  if(!t) return;
+  if(t.author === current) return alert('Tidak bisa memberi award ke thread sendiri');
+  t.awards = (t.awards||0) + 1;
+  // add points to author
+  users[t.author].points = (users[t.author].points||0) + 10;
+  users[t.author].awardsReceived = (users[t.author].awardsReceived||0) + 1;
+  save('ds_threads', threads); save('ds_users', users);
+  renderPosts(); renderProfile();
+}
+function giveAwardPost(threadId, postId){
+  if(!current) return alert('Login dulu');
+  const t = threads.find(x=>x.id===threadId);
+  if(!t) return;
+  const p = (t.posts||[]).find(x=>x.id===postId);
+  if(!p) return;
+  if(p.author === current) return alert('Tidak bisa memberi award ke postingan sendiri');
+  p.awards = (p.awards||0) + 1;
+  users[p.author].points = (users[p.author].points||0) + 10;
+  users[p.author].awardsReceived = (users[p.author].awardsReceived||0) + 1;
+  save('ds_threads', threads); save('ds_users', users);
+  renderPosts(); renderProfile();
+}
+
+// Auth: register/login (simple localStorage)
+function registerUser(username, password){
+  if(!username || !password) return alert('Isi username & password');
+  if(users[username]) return alert('Username sudah ada');
+  users[username] = {password, displayName:username, photo:'', points:0, awardsReceived:0, createdAt: isoNow()};
+  save('ds_users', users);
+  alert('Registrasi berhasil. Silakan login.');
+}
+function loginUser(username, password){
+  if(!users[username]) return alert('User tidak ditemukan');
+  if(users[username].password !== password) return alert('Password salah');
+  current = username;
+  localStorage.setItem('ds_current', current);
+  renderProfile(); renderPosts(); $('replyCard').style.display = 'block';
+}
+
+// UI auth inputs in header: create small login area
+function createAuthControls(){
+  const hr = document.createElement('div');
+  hr.className = 'small';
+  // inputs
+  hr.innerHTML = `<input id="hUser" placeholder="username" style="background:transparent;border:1px dashed rgba(255,255,255,0.03);padding:6px;border-radius:6px;color:inherit;margin-right:6px">
+  <input id="hPass" type="password" placeholder="password" style="background:transparent;border:1px dashed rgba(255,255,255,0.03);padding:6px;border-radius:6px;color:inherit;margin-right:6px">
+  <button class="btn" id="hLoginBtn">Login</button>
+  <button class="btn ghost" id="hRegBtn">Register</button>`;
+  document.querySelector('.header-right').appendChild(hr);
+  $('hLoginBtn').onclick = ()=> { loginUser($('hUser').value.trim(), $('hPass').value); $('hUser').value=''; $('hPass').value=''; };
+  $('hRegBtn').onclick = ()=> {
+    const u = prompt('Username:'); if(!u) return;
+    const p = prompt('Password:'); if(!p) return;
+    registerUser(u,p);
+  };
+}
+createAuthControls();
+
+// logout & edit
+$('btn-logout').onclick = ()=> { current = null; localStorage.removeItem('ds_current'); renderProfile(); $('replyCard').style.display='none'; };
+$('btn-edit').onclick = ()=> {
+  if(!current) return;
+  const n = prompt('Ubah display name', users[current].displayName || current);
+  if(n !== null){ users[current].displayName = n; save('ds_users', users); renderProfile(); }
+};
+
+// change PP
+$('ppFile').addEventListener('change', async (e)=>{
+  if(!current) return alert('Login dulu');
+  const f = e.target.files[0];
+  if(!f) return;
+  if(f.size > 4*1024*1024) return alert('Max 4MB');
+  const data = await toDataURL(f);
+  users[current].photo = data;
+  save('ds_users', users);
+  renderProfile();
+});
+
+// shop render & buy
+function renderShop(){
+  const container = $('shopList');
+  container.innerHTML = '';
+  shopItems.forEa
